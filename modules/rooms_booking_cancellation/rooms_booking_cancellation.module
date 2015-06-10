@@ -1,0 +1,168 @@
+<?php
+
+define('ROOMS_BOOKING_CANCELLED', 2);
+
+
+/**
+ * Implements hook_menu().
+ */
+function rooms_booking_cancellation_menu() {
+	$items['admin/rooms/bookings/booking/%rooms_booking/cancel'] = array(
+    'title' => 'Cancel',
+    'page callback' => 'rooms_booking_cancellation_cancel_form_wrapper',
+    'page arguments' => array(4),
+    'access callback' => 'rooms_booking_access',
+    'access arguments' => array('cancel', 4),
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_INLINE,
+    'weight' => 11,
+  );
+
+	return $items;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function rooms_booking_cancellation_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'rooms_booking_cancellation') . '/views',
+  );
+}
+
+/**
+ * Form callback wrapper: cancel a booking.
+ *
+ * @param $booking
+ *   The booking object being edited by this form.
+ *
+ * @see rooms_booking_edit_form()
+ */
+function rooms_booking_cancellation_cancel_form_wrapper($booking) {
+	module_load_include('inc', 'rooms_booking', 'rooms_booking.admin');
+
+  // Add the breadcrumb for the form's location.
+  rooms_booking_set_breadcrumb();
+  return drupal_get_form('rooms_booking_cancellation_cancel_form', $booking);
+}
+
+/**
+ * Form callback: confirmation form for cancelling a booking.
+ *
+ * @param $booking
+ *   The booking to delete.
+ *
+ * @see confirm_form()
+ */
+function rooms_booking_cancellation_cancel_form($form, &$form_state, $booking) {
+  $form_state['rooms_booking'] = $booking;
+
+  $form['#submit'][] = 'rooms_booking_cancellation_cancel_form_submit';
+
+  $form = confirm_form($form,
+    t('Are you sure you want to cancel Booking %name?', array('%name' => $booking->name)),
+    'admin/rooms/bookings/booking',
+    '<p>' . t('This action cannot be undone.') . '</p>',
+    t('Confirm'),
+    t('Cancel'),
+    'confirm'
+  );
+
+  return $form;
+}
+
+/**
+ * Submit callback for rooms_booking_cancellation_cancel_form.
+ */
+function rooms_booking_cancellation_cancel_form_submit($form, &$form_state) {
+  $booking = $form_state['rooms_booking'];
+
+  rooms_booking_cancellation_cancel($booking);
+
+  drupal_set_message(t('The booking %name has been cancelled.', array('%name' => $booking->name)));
+  watchdog('rooms', 'Cancelled booking %name.', array('%name' => $booking->name));
+
+  $form_state['redirect'] = 'admin/rooms/bookings';
+}
+
+/**
+ * Cancels a booking.
+ *
+ * @param RoomsBooking $booking
+ *   The RoomsBooking object that represents the booking to cancel
+ */
+function rooms_booking_cancellation_cancel(RoomsBooking $booking) {
+	// Check if the booking had a unit associated with it and if so update the
+  // availability calendar.
+  if (isset($booking->unit_id) && isset($booking->start_date) && isset($booking->end_date)) {
+    // We've updated the calendar so mark the booking as cancelled.
+    $booking->booking_status = ROOMS_BOOKING_CANCELLED;
+    $booking->save();
+
+    $uc = new UnitCalendar($booking->unit_id);
+    // We are not concerned with the state of the event id (confirmed or
+    // unconfirmed here) because we will unlock it no matter what (we look for
+    // absolute value).
+    $event_id = rooms_availability_assign_id($booking->booking_id);
+    // Create an event representing the event to remove.
+    $start_date = $booking->start_date_object;
+    $end_date = $booking->end_date_object;
+    // Remove a day from end date to represent the actual event.
+    $end_date->sub(new DateInterval('P1D'));
+    $be = new BookingEvent($booking->unit_id, $event_id, $start_date, $end_date);
+    $uc->removeEvents(array($be));
+  }
+}
+
+/**
+ * Implements hook_views_default_views_alter().
+ */
+function rooms_booking_cancellation_views_default_views_alter(&$views) {
+	$handler =& $views['bookings']->display['default']->handler;
+
+  $booking_status = array(
+  	'booking_status' => array(
+  		'id' => 'booking_status',
+			'table' => 'rooms_bookings',
+			'field' => 'booking_status',
+			'separator' => '',
+  		'label' => 'Status',
+  	),
+  );
+
+  $position = count($handler->display->display_options['fields']) - 1;
+
+  $handler->display->display_options['fields'] = array_merge(array_slice($handler->display->display_options['fields'], 0, $position), $booking_status, array_slice($handler->display->display_options['fields'], $position));
+
+  $handler->display->display_options['filters']['booking_status']['id'] = 'booking_status';
+	$handler->display->display_options['filters']['booking_status']['table'] = 'rooms_bookings';
+	$handler->display->display_options['filters']['booking_status']['field'] = 'booking_status';
+	$handler->display->display_options['filters']['booking_status']['exposed'] = TRUE;
+	$handler->display->display_options['filters']['booking_status']['expose']['operator_id'] = 'booking_status_op';
+	$handler->display->display_options['filters']['booking_status']['expose']['label'] = 'Booking status';
+	$handler->display->display_options['filters']['booking_status']['expose']['operator'] = 'booking_status_op';
+	$handler->display->display_options['filters']['booking_status']['expose']['identifier'] = 'booking_status';
+}
+
+/**
+ * Implements hook_views_data_alter().
+ */
+function rooms_booking_cancellation_views_data_alter(&$data) {
+  $data['rooms_bookings']['booking_status']['field']['handler'] = 'rooms_booking_cancellation_handler_field_booking_status';
+  $data['rooms_bookings']['booking_status']['filter']['handler'] = 'rooms_booking_cancellation_handler_filter_booking_status';
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function rooms_booking_cancellation_form_rooms_booking_edit_form_alter(&$form, &$form_state) {
+  if (isset($form_state['rooms_booking'])) {
+    $booking = $form_state['rooms_booking'];
+    if ($booking->booking_id != '') {
+      if ($booking->booking_status == ROOMS_BOOKING_CANCELLED) {
+        drupal_set_message(t('This is a cancelled booking, saving it will re-activate it.'));
+      }
+    }
+  }
+}

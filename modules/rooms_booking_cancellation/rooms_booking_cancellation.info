@@ -1,0 +1,12 @@
+name = Rooms Booking Cancellation
+description = Rooms Booking Cancellation.
+core = 7.x
+version = 1.x-dev
+
+package = Rooms
+
+dependencies[] = rooms_bonus_pack
+dependencies[] = rooms_booking
+
+files[] = views/rooms_booking_cancellation_handler_field_booking_status.inc
+files[] = views/rooms_booking_cancellation_handler_filter_booking_status.inc

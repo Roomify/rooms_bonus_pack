@@ -1,0 +1,9 @@
+name = Rooms Booking Views
+description = Rooms Booking Views.
+core = 7.x
+version = 1.x-dev
+
+package = Rooms
+
+dependencies[] = rooms_bonus_pack
+dependencies[] = rooms_booking

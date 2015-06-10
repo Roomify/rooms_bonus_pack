@@ -1,0 +1,45 @@
+<?php
+
+
+/**
+ * Implements hook_views_api().
+ */
+function rooms_booking_views_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'rooms_booking_views') . '/views',
+  );
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function rooms_booking_cancellation_form_views_exposed_form_alter(&$form, &$form_state) {
+	if ($form['#id'] == 'views-exposed-form-upcoming-bookings-block-1') {
+		$form['#info']['filter-start_date']['label'] = '';
+
+		$form['start_date']['min']['#prefix'] = '<div style="display: none;">';
+		$form['start_date']['min']['#suffix'] = '</div>';
+
+		$form['start_date']['max'] = array(
+			'#type' => 'select',
+			'#title' => 'Time period',
+			'#options' => array('+7 days' => '7 days', '+15 days' => '15 days', '+1 month' => '1 month', '+3 months' => '3 months'),
+			'#default_value' => '+7 days',
+		);
+	}
+
+	if ($form['#id'] == 'views-exposed-form-outgoing-bookings-block-1') {
+		$form['#info']['filter-end_date']['label'] = '';
+
+		$form['end_date']['min']['#prefix'] = '<div style="display: none;">';
+		$form['end_date']['min']['#suffix'] = '</div>';
+
+		$form['end_date']['max'] = array(
+			'#type' => 'select',
+			'#title' => 'Time period',
+			'#options' => array('+7 days' => '7 days', '+15 days' => '15 days', '+1 month' => '1 month', '+3 months' => '3 months'),
+			'#default_value' => '+7 days',
+		);
+	}
+}

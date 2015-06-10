@@ -96,22 +96,24 @@ function rooms_booking_cancellation_cancel(RoomsBooking $booking) {
 	// Check if the booking had a unit associated with it and if so update the
   // availability calendar.
   if (isset($booking->unit_id) && isset($booking->start_date) && isset($booking->end_date)) {
-    // We've updated the calendar so mark the booking as cancelled.
-    $booking->booking_status = ROOMS_BOOKING_CANCELLED;
-    $booking->save();
+    if ($booking->booking_status != ROOMS_BOOKING_CANCELLED) {
+      // We've updated the calendar so mark the booking as cancelled.
+      $booking->booking_status = ROOMS_BOOKING_CANCELLED;
+      $booking->save();
 
-    $uc = new UnitCalendar($booking->unit_id);
-    // We are not concerned with the state of the event id (confirmed or
-    // unconfirmed here) because we will unlock it no matter what (we look for
-    // absolute value).
-    $event_id = rooms_availability_assign_id($booking->booking_id);
-    // Create an event representing the event to remove.
-    $start_date = $booking->start_date_object;
-    $end_date = $booking->end_date_object;
-    // Remove a day from end date to represent the actual event.
-    $end_date->sub(new DateInterval('P1D'));
-    $be = new BookingEvent($booking->unit_id, $event_id, $start_date, $end_date);
-    $uc->removeEvents(array($be));
+      $uc = new UnitCalendar($booking->unit_id);
+      // We are not concerned with the state of the event id (confirmed or
+      // unconfirmed here) because we will unlock it no matter what (we look for
+      // absolute value).
+      $event_id = rooms_availability_assign_id($booking->booking_id);
+      // Create an event representing the event to remove.
+      $start_date = $booking->start_date_object;
+      $end_date = $booking->end_date_object;
+      // Remove a day from end date to represent the actual event.
+      $end_date->sub(new DateInterval('P1D'));
+      $be = new BookingEvent($booking->unit_id, $event_id, $start_date, $end_date);
+      $uc->removeEvents(array($be));
+    }
   }
 }
 

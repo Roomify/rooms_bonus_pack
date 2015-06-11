@@ -7,7 +7,7 @@ define('ROOMS_BOOKING_CANCELLED', 2);
  * Implements hook_menu().
  */
 function rooms_booking_cancellation_menu() {
-	$items['admin/rooms/bookings/booking/%rooms_booking/cancel'] = array(
+  $items['admin/rooms/bookings/booking/%rooms_booking/cancel'] = array(
     'title' => 'Cancel',
     'page callback' => 'rooms_booking_cancellation_cancel_form_wrapper',
     'page arguments' => array(4),
@@ -18,7 +18,7 @@ function rooms_booking_cancellation_menu() {
     'weight' => 11,
   );
 
-	return $items;
+  return $items;
 }
 
 /**
@@ -40,7 +40,7 @@ function rooms_booking_cancellation_views_api() {
  * @see rooms_booking_edit_form()
  */
 function rooms_booking_cancellation_cancel_form_wrapper($booking) {
-	module_load_include('inc', 'rooms_booking', 'rooms_booking.admin');
+  module_load_include('inc', 'rooms_booking', 'rooms_booking.admin');
 
   // Add the breadcrumb for the form's location.
   rooms_booking_set_breadcrumb();
@@ -93,7 +93,7 @@ function rooms_booking_cancellation_cancel_form_submit($form, &$form_state) {
  *   The RoomsBooking object that represents the booking to cancel
  */
 function rooms_booking_cancellation_cancel(RoomsBooking $booking) {
-	// Check if the booking had a unit associated with it and if so update the
+  // Check if the booking had a unit associated with it and if so update the
   // availability calendar.
   if (isset($booking->unit_id) && isset($booking->start_date) && isset($booking->end_date)) {
     if ($booking->booking_status != ROOMS_BOOKING_CANCELLED) {
@@ -121,16 +121,16 @@ function rooms_booking_cancellation_cancel(RoomsBooking $booking) {
  * Implements hook_views_default_views_alter().
  */
 function rooms_booking_cancellation_views_default_views_alter(&$views) {
-	$handler =& $views['bookings']->display['default']->handler;
+  $handler =& $views['bookings']->display['default']->handler;
 
   $booking_status = array(
-  	'booking_status' => array(
-  		'id' => 'booking_status',
-			'table' => 'rooms_bookings',
-			'field' => 'booking_status',
-			'separator' => '',
-  		'label' => 'Status',
-  	),
+    'booking_status' => array(
+      'id' => 'booking_status',
+      'table' => 'rooms_bookings',
+      'field' => 'booking_status',
+      'separator' => '',
+      'label' => 'Status',
+    ),
   );
 
   $position = count($handler->display->display_options['fields']) - 1;
@@ -138,13 +138,13 @@ function rooms_booking_cancellation_views_default_views_alter(&$views) {
   $handler->display->display_options['fields'] = array_merge(array_slice($handler->display->display_options['fields'], 0, $position), $booking_status, array_slice($handler->display->display_options['fields'], $position));
 
   $handler->display->display_options['filters']['booking_status']['id'] = 'booking_status';
-	$handler->display->display_options['filters']['booking_status']['table'] = 'rooms_bookings';
-	$handler->display->display_options['filters']['booking_status']['field'] = 'booking_status';
-	$handler->display->display_options['filters']['booking_status']['exposed'] = TRUE;
-	$handler->display->display_options['filters']['booking_status']['expose']['operator_id'] = 'booking_status_op';
-	$handler->display->display_options['filters']['booking_status']['expose']['label'] = 'Booking status';
-	$handler->display->display_options['filters']['booking_status']['expose']['operator'] = 'booking_status_op';
-	$handler->display->display_options['filters']['booking_status']['expose']['identifier'] = 'booking_status';
+  $handler->display->display_options['filters']['booking_status']['table'] = 'rooms_bookings';
+  $handler->display->display_options['filters']['booking_status']['field'] = 'booking_status';
+  $handler->display->display_options['filters']['booking_status']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['booking_status']['expose']['operator_id'] = 'booking_status_op';
+  $handler->display->display_options['filters']['booking_status']['expose']['label'] = 'Booking status';
+  $handler->display->display_options['filters']['booking_status']['expose']['operator'] = 'booking_status_op';
+  $handler->display->display_options['filters']['booking_status']['expose']['identifier'] = 'booking_status';
 }
 
 /**

@@ -15,31 +15,73 @@ function rooms_booking_views_views_api() {
  * Implements hook_form_FORM_ID_alter().
  */
 function rooms_booking_cancellation_form_views_exposed_form_alter(&$form, &$form_state) {
-	if ($form['#id'] == 'views-exposed-form-upcoming-bookings-block-1') {
-		$form['#info']['filter-start_date']['label'] = '';
+  if ($form['#id'] == 'views-exposed-form-bookings-page-1') {
+    $form['#info']['filter-start_date']['label'] = 'Time period';
 
-		$form['start_date']['min']['#prefix'] = '<div style="display: none;">';
-		$form['start_date']['min']['#suffix'] = '</div>';
+    $form['start_date']['min']['#prefix'] = '<div style="display: none;">';
+    $form['start_date']['min']['#suffix'] = '</div>';
 
-		$form['start_date']['max'] = array(
-			'#type' => 'select',
-			'#title' => 'Time period',
-			'#options' => array('+7 days' => '7 days', '+15 days' => '15 days', '+1 month' => '1 month', '+3 months' => '3 months'),
-			'#default_value' => '+7 days',
-		);
-	}
+    $form['start_date']['max'] = array(
+      '#type' => 'select',
+      '#title' => '',
+      '#options' => array('' => '- Any -', '+7 days' => '7 days', '+15 days' => '15 days', '+1 month' => '1 month', '+3 months' => '3 months'),
+      '#default_value' => '+7 days',
+    );
 
-	if ($form['#id'] == 'views-exposed-form-outgoing-bookings-block-1') {
-		$form['#info']['filter-end_date']['label'] = '';
+    $form['#validate'][] = 'rooms_booking_views_time_period_form_validate';
+  }
 
-		$form['end_date']['min']['#prefix'] = '<div style="display: none;">';
-		$form['end_date']['min']['#suffix'] = '</div>';
+  if ($form['#id'] == 'views-exposed-form-upcoming-bookings-block-1') {
+    $form['#info']['filter-start_date']['label'] = 'Time period';
 
-		$form['end_date']['max'] = array(
-			'#type' => 'select',
-			'#title' => 'Time period',
-			'#options' => array('+7 days' => '7 days', '+15 days' => '15 days', '+1 month' => '1 month', '+3 months' => '3 months'),
-			'#default_value' => '+7 days',
-		);
-	}
+    $form['start_date']['min']['#prefix'] = '<div style="display: none;">';
+    $form['start_date']['min']['#suffix'] = '</div>';
+
+    $form['start_date']['max'] = array(
+      '#type' => 'select',
+      '#title' => '',
+      '#options' => array('+7 days' => '7 days', '+15 days' => '15 days', '+1 month' => '1 month', '+3 months' => '3 months'),
+      '#default_value' => '+7 days',
+    );
+  }
+
+  if ($form['#id'] == 'views-exposed-form-outgoing-bookings-block-1') {
+    $form['#info']['filter-end_date']['label'] = 'Time period';
+
+    $form['end_date']['min']['#prefix'] = '<div style="display: none;">';
+    $form['end_date']['min']['#suffix'] = '</div>';
+
+    $form['end_date']['max'] = array(
+      '#type' => 'select',
+      '#title' => '',
+      '#options' => array('+7 days' => '7 days', '+15 days' => '15 days', '+1 month' => '1 month', '+3 months' => '3 months'),
+      '#default_value' => '+7 days',
+    );
+  }
+}
+
+/**
+ * Validate function for "views-exposed-form-bookings-page-1" form.
+ */
+function rooms_booking_views_time_period_form_validate($form, &$form_state) {
+  $form_state['values']['start_date']['min'] = ($form_state['values']['start_date']['max'] == '') ? '' : 'now';
+}
+
+/**
+ * Implements hook_views_default_views_alter().
+ */
+function rooms_booking_views_views_default_views_alter(&$views) {
+  $handler =& $views['bookings']->display['default']->handler;
+
+  $handler->display->display_options['filters']['start_date']['id'] = 'start_date';
+  $handler->display->display_options['filters']['start_date']['table'] = 'rooms_bookings';
+  $handler->display->display_options['filters']['start_date']['field'] = 'start_date';
+  $handler->display->display_options['filters']['start_date']['operator'] = 'between';
+  $handler->display->display_options['filters']['start_date']['value']['min'] = '';
+  $handler->display->display_options['filters']['start_date']['value']['max'] = '';
+  $handler->display->display_options['filters']['start_date']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['start_date']['expose']['operator_id'] = 'start_date_op';
+  $handler->display->display_options['filters']['start_date']['expose']['label'] = 'Start Date';
+  $handler->display->display_options['filters']['start_date']['expose']['operator'] = 'start_date_op';
+  $handler->display->display_options['filters']['start_date']['expose']['identifier'] = 'start_date';
 }

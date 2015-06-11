@@ -127,6 +127,11 @@ function rooms_booking_views_views_default_views() {
 	$handler->display->display_options['filters']['start_date']['operator'] = 'between';
 	$handler->display->display_options['filters']['start_date']['value']['min'] = 'now';
 	$handler->display->display_options['filters']['start_date']['value']['max'] = '+7 days';
+	$handler->display->display_options['filters']['start_date']['exposed'] = TRUE;
+	$handler->display->display_options['filters']['start_date']['expose']['operator_id'] = 'start_date_op';
+	$handler->display->display_options['filters']['start_date']['expose']['label'] = 'Start Date';
+	$handler->display->display_options['filters']['start_date']['expose']['operator'] = 'start_date_op';
+	$handler->display->display_options['filters']['start_date']['expose']['identifier'] = 'start_date';
 	/* Filter criterion: Bookings: Booking_status */
 	$handler->display->display_options['filters']['booking_status']['id'] = 'booking_status';
 	$handler->display->display_options['filters']['booking_status']['table'] = 'rooms_bookings';
@@ -262,6 +267,11 @@ function rooms_booking_views_views_default_views() {
 	$handler->display->display_options['filters']['end_date']['operator'] = 'between';
 	$handler->display->display_options['filters']['end_date']['value']['min'] = 'now';
 	$handler->display->display_options['filters']['end_date']['value']['max'] = '+7 days';
+	$handler->display->display_options['filters']['end_date']['exposed'] = TRUE;
+	$handler->display->display_options['filters']['end_date']['expose']['operator_id'] = 'end_date_op';
+	$handler->display->display_options['filters']['end_date']['expose']['label'] = 'End Date';
+	$handler->display->display_options['filters']['end_date']['expose']['operator'] = 'end_date_op';
+	$handler->display->display_options['filters']['end_date']['expose']['identifier'] = 'end_date';
 	/* Filter criterion: Bookings: Booking_status */
 	$handler->display->display_options['filters']['booking_status']['id'] = 'booking_status';
 	$handler->display->display_options['filters']['booking_status']['table'] = 'rooms_bookings';

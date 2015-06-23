@@ -22,6 +22,26 @@ function rooms_booking_cancellation_menu() {
 }
 
 /**
+ * Implements hook_rules_event_info().
+ */
+function rooms_booking_cancellation_rules_event_info() {
+  $defaults = array(
+    'group' => t('bookings'),
+    'module' => 'rooms_booking_cancellation',
+    'access callback' => 'rooms_booking_access',
+    'access arguments' => array('cancel', 4),
+  );
+  return array(
+    'booking_cancel' => $defaults + array(
+      'label' => t('After cancelling a booking'),
+      'variables' => array(
+        'booking' => array('type' => 'rooms_booking', 'label' => t('canceled booking')),
+      ),
+    ),
+  );
+}
+
+/**
  * Implements hook_views_api().
  */
 function rooms_booking_cancellation_views_api() {
@@ -113,6 +133,9 @@ function rooms_booking_cancellation_cancel(RoomsBooking $booking) {
       $end_date->sub(new DateInterval('P1D'));
       $be = new BookingEvent($booking->unit_id, $event_id, $start_date, $end_date);
       $uc->removeEvents(array($be));
+
+      // Invoke rules event.
+      rules_invoke_event_by_args('booking_cancel', array('booking' => $booking));
     }
   }
 }

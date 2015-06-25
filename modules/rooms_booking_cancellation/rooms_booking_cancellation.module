@@ -182,6 +182,16 @@ function rooms_booking_cancellation_views_data_alter(&$data) {
  * Implements hook_form_FORM_ID_alter().
  */
 function rooms_booking_cancellation_form_rooms_booking_edit_form_alter(&$form, &$form_state) {
+  // Hide default cancel (close) button.
+  $form['actions']['cancel']['#access'] = FALSE;
+
+  // Add button to cancel booking.
+  $form['actions']['cancel_booking'] = array(
+    '#markup' => '<a href="/admin/rooms/bookings/booking/' . $form['#entity']->booking_id . '/cancel">Cancel Booking</a>',
+    '#weight' => 50,
+  );
+
+  // Add warning message for canceled bookings.
   if (isset($form_state['rooms_booking'])) {
     $booking = $form_state['rooms_booking'];
     if ($booking->booking_id != '') {

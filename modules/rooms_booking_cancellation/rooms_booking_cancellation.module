@@ -146,6 +146,11 @@ function rooms_booking_cancellation_cancel(RoomsBooking $booking) {
 function rooms_booking_cancellation_views_default_views_alter(&$views) {
   $handler =& $views['bookings']->display['default']->handler;
 
+  // Bail out if necessary.
+  if (!isset($handler)) {
+    return;
+  }
+
   $booking_status = array(
     'booking_status' => array(
       'id' => 'booking_status',

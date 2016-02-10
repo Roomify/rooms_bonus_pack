@@ -2,6 +2,17 @@
 
 
 /**
+ * Implements hook_module_implements_alter().
+ */
+function rooms_booking_views_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'form_views_exposed_form_alter' && isset($implementations['rooms_booking_views'])) {
+    $group = $implementations['rooms_booking_views'];
+    unset($implementations['rooms_booking_views']);
+    $implementations['rooms_booking_views'] = $group;
+  }
+}
+
+/**
  * Implements hook_views_api().
  */
 function rooms_booking_views_views_api() {
@@ -14,7 +25,7 @@ function rooms_booking_views_views_api() {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function rooms_booking_cancellation_form_views_exposed_form_alter(&$form, &$form_state) {
+function rooms_booking_views_form_views_exposed_form_alter(&$form, &$form_state) {
   if ($form['#id'] == 'views-exposed-form-bookings-page-1') {
     $form['#info']['filter-start_date']['label'] = 'Time period';
 
@@ -27,6 +38,10 @@ function rooms_booking_cancellation_form_views_exposed_form_alter(&$form, &$form
       '#options' => array('' => '- Any -', '+7 days' => '7 days', '+15 days' => '15 days', '+1 month' => '1 month', '+3 months' => '3 months'),
       '#default_value' => '+7 days',
     );
+
+    if (isset($form['start_date']['#type'])) {
+      unset($form['start_date']['#type']);
+    }
 
     $form['#validate'][] = 'rooms_booking_views_time_period_form_validate';
   }
@@ -79,6 +94,7 @@ function rooms_booking_views_views_default_views_alter(&$views) {
   $handler->display->display_options['filters']['start_date']['operator'] = 'between';
   $handler->display->display_options['filters']['start_date']['value']['min'] = '';
   $handler->display->display_options['filters']['start_date']['value']['max'] = '';
+  $handler->display->display_options['filters']['start_date']['value']['type'] = 'offset';
   $handler->display->display_options['filters']['start_date']['exposed'] = TRUE;
   $handler->display->display_options['filters']['start_date']['expose']['operator_id'] = 'start_date_op';
   $handler->display->display_options['filters']['start_date']['expose']['label'] = 'Start Date';

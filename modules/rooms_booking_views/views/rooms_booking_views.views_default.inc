@@ -127,6 +127,7 @@ function rooms_booking_views_views_default_views() {
   $handler->display->display_options['filters']['start_date']['operator'] = 'between';
   $handler->display->display_options['filters']['start_date']['value']['min'] = 'now';
   $handler->display->display_options['filters']['start_date']['value']['max'] = '+7 days';
+  $handler->display->display_options['filters']['start_date']['value']['type'] = 'offset';
   $handler->display->display_options['filters']['start_date']['exposed'] = TRUE;
   $handler->display->display_options['filters']['start_date']['expose']['operator_id'] = 'start_date_op';
   $handler->display->display_options['filters']['start_date']['expose']['label'] = 'Start Date';
@@ -267,6 +268,7 @@ function rooms_booking_views_views_default_views() {
   $handler->display->display_options['filters']['end_date']['operator'] = 'between';
   $handler->display->display_options['filters']['end_date']['value']['min'] = 'now';
   $handler->display->display_options['filters']['end_date']['value']['max'] = '+7 days';
+  $handler->display->display_options['filters']['end_date']['value']['type'] = 'offset';
   $handler->display->display_options['filters']['end_date']['exposed'] = TRUE;
   $handler->display->display_options['filters']['end_date']['expose']['operator_id'] = 'end_date_op';
   $handler->display->display_options['filters']['end_date']['expose']['label'] = 'End Date';
